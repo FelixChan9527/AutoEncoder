@@ -27,16 +27,26 @@ def extract_imgs(video_path, video_frames_path):
         if not os.path.exists(save_path):
             os.makedirs(save_path)
 
+        frame_buff = 0
         while frame_exit:
             frame_exit, frame = video.read()            # 获取下一帧
             time = video.get(cv2.CAP_PROP_POS_MSEC)     # 获取当前时间戳
-            # frame_name = str(frame_num) + ".jpg"
+
+            ex = (time // 40) -  frame_num  # 正常来说，ex应该为0
+            # 执行以下循环，说明发生了跳帧
+            for i in range(int(ex)):
+                frame_name = str(frame_num)+"_"+str(int(time-i*40)) + ".jpg"
+                frame_path = os.path.join(save_path, frame_name)
+                frame_num += 1
+                cv2.imwrite(frame_path, frame_buff)
+                print(frame_path)
+            frame_buff = frame  # 保留本次的图像，供下一次如果掉帧时使用
+
             frame_name = str(frame_num)+"_"+str(int(time)) + ".jpg"
             frame_path = os.path.join(save_path, frame_name)
 
             if frame_exit:
                 cv2.imwrite(frame_path, frame)
-                # time = video.get(cv2.CAP_PROP_POS_MSEC)     # 获取当前时间戳
                 pass
             else:
                 break
