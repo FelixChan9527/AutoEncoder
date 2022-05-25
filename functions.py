@@ -66,31 +66,35 @@ def extract_imgs(video_path, video_frames_path, model_path):
                 ex = (time // 40) -  frame_num  # 正常来说，ex应该为0
                 # 执行以下循环，说明发生了跳帧
                 for i in range(int(ex)):
-                    if acc <= 70:
-                        frame_name = str(frame_num)+"_"+str(int(time-(i+1)*40)) + "_ac_" + "ex_" + ".jpg"
+                    if acc <= 70:       # 误差过大，就不要了
+                        # frame_name = str(frame_num)+"_"+str(int(time-(i+1)*40)) + "_ac_" + "ex_" + ".jpg"
+                        frame_num += 1
+                        print("No face, skip!")
                     else:
                         frame_name = str(frame_num)+"_"+str(int(time-(i+1)*40)) + "_ex_" + ".jpg"
-                    frame_path = os.path.join(save_path, frame_name)
-                    frame_num += 1
-                    cv2.imwrite(frame_path, frame_buff)
-                    print(frame_name)
+                        frame_path = os.path.join(save_path, frame_name)
+                        frame_num += 1
+                        cv2.imwrite(frame_path, frame_buff)
+                        print(frame_name)
                 frame_buff = frame  # 保留本次的图像，供下一次如果掉帧时使用
 
                 if acc <= 70:
-                    frame_name = str(frame_num)+"_"+str(int(time)) + "_ac_" + ".jpg"
+                    # frame_name = str(frame_num)+"_"+str(int(time)) + "_ac_" + ".jpg"
+                    frame_num += 1
+                    print("No face, skip!")
                 else:
                     frame_name = str(frame_num)+"_"+str(int(time)) + ".jpg"
-                frame_path = os.path.join(save_path, frame_name)
-                print(frame_name)
-                try:
-                    cv2.imwrite(frame_path, frame)
-                    frame_num += 1
-                except cv2.error:       # 会出现这个奇怪的错误
-                    send_msg("出现异常")
-                    frame_name = str(frame_num)+"_"+str(int(time)) + "_bc_" + ".jpg"
-                    cv2.imwrite(frame_path, frame_buff)
+                    frame_path = os.path.join(save_path, frame_name)
                     print(frame_name)
-                    frame_num += 1
+                    try:
+                        cv2.imwrite(frame_path, frame)
+                        frame_num += 1
+                    except cv2.error:       # 会出现这个奇怪的错误
+                        send_msg("出现异常")
+                        frame_name = str(frame_num)+"_"+str(int(time)) + "_bc_" + ".jpg"
+                        cv2.imwrite(frame_path, frame_buff)
+                        print(frame_name)
+                        frame_num += 1
             
             else:
                 send_msg("完成一次")
