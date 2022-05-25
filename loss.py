@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class AutoEncoderLoss(nn.Module):
-    def __init__(self, altha, beta, gama) -> None:
+    def __init__(self, altha=1, beta=1, gama=0.01) -> None:
         super().__init__()
         self.altha = altha
         self.beta = beta
@@ -32,7 +32,6 @@ class AutoEncoderLoss(nn.Module):
         denominator=var_gt+var_pr+(mean_gt-mean_pr)**2
 
         ccc = numerator/(denominator+0.0000001)
-
         return ccc
     
     def rec_loss(self, a_pr, a_gt, v_pr, v_gt):
@@ -54,13 +53,26 @@ class AutoEncoderLoss(nn.Module):
 
 
 if __name__ == "__main__":
-    loss = AutoEncoderLoss()
-    x1 = torch.randn([1, 20, 3, 96, 96])     # 序列长度为50，batch大小为4
-    x2 = torch.ones([5, 20, 1, 640])
-    a_pr = torch.tensor([12.3, 1.1, 4.5, 9.0])    # batchsize为20
-    a_gt = torch.tensor([11.1, 23.5, 6.1, 8.4])
-    ccc = loss.CCC(a_pr, a_gt)
-    print(ccc)
+    loss_fn = AutoEncoderLoss()
+    image_pr = torch.randn([5, 20, 3, 96, 96])     # 序列长度为5，batch大小为20
+    image_pr = image_pr.to("cuda")
+    image_gt = torch.randn([5, 20, 3, 96, 96])     # 序列长度为5，batch大小为20
+    image_gt = image_gt.to("cuda")
+    signal_pr = torch.ones([5, 20, 1, 640])
+    signal_pr = signal_pr.to("cuda")
+    signal_gt = torch.ones([5, 20, 1, 640])
+    signal_gt = signal_gt.to("cuda")
+    a_pr = torch.randn([20])    # batchsize为20
+    a_pr = a_pr.to("cuda")
+    a_gt = torch.randn([20])    # batchsize为20
+    a_gt = a_gt.to("cuda")
+    v_pr = torch.randn([20])
+    v_pr = v_pr.to("cuda")
+    v_gt = torch.randn([20])
+    v_gt = v_gt.to("cuda")
+    
+    loss = loss_fn(image_pr, image_gt, signal_pr, signal_gt, a_pr, a_gt, v_pr, v_gt)
+    print(loss)
 
     
 
