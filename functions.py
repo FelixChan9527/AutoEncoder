@@ -91,9 +91,7 @@ def extract_imgs(video_path, video_frames_path, model_path):
                         frame_num += 1
                     except cv2.error:       # 会出现这个奇怪的错误
                         send_msg("出现异常")
-                        frame_name = str(frame_num)+"_"+str(int(time)) + "_bc_" + ".jpg"
-                        cv2.imwrite(frame_path, frame_buff)
-                        print(frame_name)
+                        print("No face, skip!")
                         frame_num += 1
             
             else:
