@@ -200,16 +200,17 @@ def get_pic_sequence(pic_index, image_dirs_txt):
     ### 输出：划分好的图像路径数组
     """
     with open(image_dirs_txt, "r") as f:
-        # img_dirs = np.array([line.strip("\n") for line in f.readlines()])
-        imgs = []
-        for img_dir in f:
-            img = Image.open(img_dir.strip("\n")).convert("RGB").resize((90, 90))
-            imgs.append(img)
-        imgs = np.array(imgs, dtype=object)[pic_index]
+        img_dirs = np.array([line.strip("\n") for line in f.readlines()])
+        # imgs = []
+        # for img_dir in f:
+        #     img = np.array(Image.open(img_dir.strip("\n")).convert("RGB").resize((90, 90)))
+        #     imgs.append(img)
+        # imgs = np.array(imgs, dtype=object)[pic_index]
+        img_dirs = np.array(img_dirs)[pic_index]
     
     f.close()
 
-    return imgs
+    return img_dirs
 
 def get_index(index_txt):
     """
@@ -260,7 +261,7 @@ def read_all_data(names_txt_dir, audio_path, txt_path, label_path):
     names = names_txt.readlines()
     
     frist = True
-    imgs_all = None
+    imgs_dir_all = None
     audio_all = None
     arousal_all = None
     valence_all = None
@@ -274,19 +275,19 @@ def read_all_data(names_txt_dir, audio_path, txt_path, label_path):
         
         seuqence_index = get_index(index_txt_dir)
         pic_index = get_index(pic_txt_dir)
-        imgs = get_pic_sequence(pic_index, video_txt_dir)
+        img_dirs = get_pic_sequence(pic_index, video_txt_dir)
         audio = get_audio_sequence(seuqence_index, audio_txt_dir, audio_frame_len=640)
 
         arousal, valence = read_all_label(name, label_path, seuqence_index)
         
         if frist:
-            imgs_all = imgs
+            imgs_dir_all = img_dirs
             audio_all = audio
             arousal_all = arousal
             valence_all = valence
             frist = False
         else:
-            imgs_all = np.concatenate((imgs_all, imgs), axis=0)
+            imgs_dir_all = np.concatenate((imgs_dir_all, img_dirs), axis=0)
             audio_all = np.concatenate((audio_all, audio), axis=0)
             arousal_all = np.concatenate((arousal_all, arousal), axis=0)
             valence_all = np.concatenate((valence_all, valence), axis=0)
@@ -294,11 +295,13 @@ def read_all_data(names_txt_dir, audio_path, txt_path, label_path):
         print(name, " finish reading ! ")
 
     end_time = time.time()
-    print(imgs_all.shape, audio_all.shape, arousal_all.shape, valence_all.shape)
-    print("take time: ", int(end_time-start_time), " S. ")
+    print(imgs_dir_all.shape, audio_all.shape, arousal_all.shape, valence_all.shape)
+    print("take time: ", int(end_time-start_time), " S ")
     names_txt.close()
 
-    return imgs_all, audio_all, arousal_all, valence_all
+    send_msg("数据读取完成！")
+
+    return imgs_dir_all, audio_all, arousal_all, valence_all
 
 def read_arff(arff_path):
     """
