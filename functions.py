@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 import time
+from tqdm import tqdm
 
 
 def send_msg(msg):      # 用于发送信息给微信
@@ -269,6 +270,8 @@ def read_all_data(names_txt_dir, audio_path, txt_path, label_path):
     arousal_all = None
     valence_all = None
 
+    names = tqdm(names)
+
     for name in names:
         name = name.strip("\n")
         video_txt_dir = os.path.join(txt_path, name+".txt")
@@ -295,7 +298,9 @@ def read_all_data(names_txt_dir, audio_path, txt_path, label_path):
             arousal_all = np.concatenate((arousal_all, arousal), axis=0)
             valence_all = np.concatenate((valence_all, valence), axis=0)
         
-        print(name, " finish reading ! ")
+        names.set_postfix(data=name)
+        
+        # print(name, " finish reading ! ")
 
     end_time = time.time()
     print(imgs_dir_all.shape, audio_all.shape, arousal_all.shape, valence_all.shape)

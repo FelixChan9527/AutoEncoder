@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 
 class RecolaDataset(Dataset):
-    def __init__(self, names_txt_dir, audio_path, txt_path, label_path, img_shape=(3, 90, 90)) -> None:
+    def __init__(self, names_txt_dir, audio_path, txt_path, label_path, img_shape=(3, 96, 96)) -> None:
         self.imgs_dir_all, self.audio_all, self.arousal_all, self.valence_all = functions.read_all_data(
             names_txt_dir, audio_path, txt_path, label_path
         )
@@ -33,7 +33,7 @@ class RecolaDataset(Dataset):
         l = len(imgs_dirs)      # 序列长度
         imgs = torch.zeros((l, *self.img_shape))
         for idx, img_dir in enumerate(imgs_dirs):   # 解析图像文件
-            img = np.array(Image.open(img_dir).convert("RGB").resize((90, 90)))
+            img = np.array(Image.open(img_dir).convert("RGB").resize((96, 96)))
             augmentations = self.transforms(image=img)      # 图像增强
             img = augmentations["image"]
             imgs[idx] = img
@@ -54,5 +54,6 @@ if __name__ == "__main__":
         img_sq, audio_sq, arousal, valence = data
         img_sq = img_sq.permute(1, 0, 2, 3, 4)      # 维度转换
         audio_sq = audio_sq.permute(1, 0, 2)
+        audio_sq = audio_sq.unsqueeze(2)
         print(img_sq.shape, audio_sq.shape)
 
