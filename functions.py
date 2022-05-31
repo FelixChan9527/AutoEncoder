@@ -201,6 +201,9 @@ def get_pic_sequence(pic_index, image_dirs_txt):
     """
     with open(image_dirs_txt, "r") as f:
         img_dirs = np.array([line.strip("\n") for line in f.readlines()])
+        """
+        ### 以下的注释代码是将图像文件一次性导入到内存以缩短数据预处理时间，但是这样做容易爆内存
+        """
         # imgs = []
         # for img_dir in f:
         #     img = np.array(Image.open(img_dir.strip("\n")).convert("RGB").resize((90, 90)))
