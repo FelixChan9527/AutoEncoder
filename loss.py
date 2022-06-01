@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class AutoEncoderLoss(nn.Module):
-    def __init__(self, altha=1, beta=1, gama=0.01) -> None:
+    def __init__(self, altha=10, beta=10, gama=0.1) -> None:
         super().__init__()
         self.altha = altha
         self.beta = beta

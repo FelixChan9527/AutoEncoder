@@ -35,7 +35,7 @@ audio_path = "/home/MyServer/data/RECOLA/recordings_audio/recordings_audio"
 txt_path = "/home/MyServer/data/RECOLA/txt_data"
 label_path = "/home/MyServer/data/RECOLA/labels/gs_1"
 epochs = 200
-lr = 0.0001
+lr = 0.00001
 batchsize = 128
 model_path = "/home/MyServer/model_file/RECOLA"
 writer = SummaryWriter("/home/MyServer/MyCode/logs")      # 指定过程数据保存路径
@@ -50,6 +50,7 @@ def train_fn(auto_encoder, dataset, epochs, checkpoint):
 
     count = 0
     for epoch in range(epoch+1, epochs):
+        loss_epoch = 0
         loader = DataLoader(dataset, batchsize, shuffle=True)
         auto_encoder.train()
 
@@ -66,13 +67,14 @@ def train_fn(auto_encoder, dataset, epochs, checkpoint):
 
             img_pr, sig_pr, arousal_pr, valence_pr = auto_encoder(img_sq, audio_sq)
             loss = loss_fn(img_pr, img_sq, sig_pr, audio_sq, arousal_pr, arousal_gt, valence_pr, valence_gt)
+            loss_epoch += loss
             optim.zero_grad()   # 设定优化的方向
             loss.backward()     # 从最后一层损失反向计算到所有层的损失     
             optim.step()        # 更新权重
 
             loop.set_description(f"Epoch [{epoch}/{epochs}]")
             loop.set_postfix(loss=loss.item())
-            writer.add_scalar("the loss", loss, count)
+            writer.add_scalar("the batch avg loss", loss, count)
             count += 1
 
             # view_pic = torchvision.transforms.ToPILImage()(img_pr[0, 0] * 255)
@@ -80,6 +82,8 @@ def train_fn(auto_encoder, dataset, epochs, checkpoint):
             # view_pic.save("/home/MyServer/pics/"+str(idx)+"r.jpg")
             # view_pic2.save("/home/MyServer/pics/"+str(idx)+"n.jpg")
 
+        avg_loss = loss_epoch / len(loader)
+        writer.add_scalar("epoch averange loss", avg_loss, epoch)
         torch.save({"epoch": epoch, 'model_state_dict': auto_encoder.state_dict(), 
         'optimizer_state_dict': optim.state_dict(), 'loss': loss}, model_path+"/RECOLA_{}.pth.tar".format(epoch))
         # torch.save(auto_encoder.state_dict(), model_path+"/RECOLA_{}.pth".format(epoch))
@@ -93,6 +97,6 @@ if __name__ == "__main__":
     dataset = RecolaDataset(names_txt_dir, audio_path, txt_path, label_path)
     # auto_encoder.load_state_dict(torch.load("/home/MyServer/model_file/RECOLA/RECOLA_2.pth"))
     
-    checkpoint = torch.load("/home/MyServer/model_file/RECOLA/RECOLA_19.pth.tar")
+    checkpoint = torch.load("/home/MyServer/model_file/RECOLA/RECOLA_31.pth.tar")
     train_fn(auto_encoder, dataset, epochs, checkpoint)
     
